@@ -17,9 +17,6 @@
                 <script src="https://cdn.jsdelivr.net/npm/docx-merger@1.2.2/dist/docx-merger.min.js"></script>
                 <script src="./js/jszip.js" ></script>
 
-                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div class="bg-blue-600 h-2.5 rounded-full" id="progressBar" style="width: 0%"></div>
-                </div>
                  <!--<input type="file" id="docx" class="" />-->
                  <h1>Choose .docx file</h1>
                 <form>
@@ -91,10 +88,7 @@
                 <script>
                     const docx = document.getElementById("docx");
                     const excel = document.getElementById("excel");
-                    const progressBar = document.getElementById('progressBar');
                     var index = 0;
-                    var barMax = 100;
-                    var currentBar = 0;
                     var zip2 = new JSZip();
                     var merging_contents = [];
 
@@ -124,11 +118,8 @@
                                     for(let j=0; j<sheet._rows[0]._cells.length; j++){
                                         names[j] = sheet._rows[0]._cells[j].value;
                                     }
-                                    barMax = sheet._rows.length;
-                                    currentBar = 0;
                                     for(let i=1; i<sheet._rows.length; i++){
                                         values = [];
-                                        
                                         for(let j=0; j<sheet._rows[i]._cells.length; j++){
                                             if(typeof sheet._rows[i]._cells[j].value === 'object' && sheet._rows[i]._cells[j].value !== null)
                                                 values.push([names[j],sheet._rows[i]._cells[j].value.result])
@@ -193,16 +184,10 @@
                             else{
                                 const entries = Object.entries(values);
                                 //console.log(entries)
-                                if(document.getElementById('checkbox').checked){
-                                    currentBar++;
-                                    progressBar.style.width = currentBar/barMax*100 + "%"
+                                if(document.getElementById('checkbox').checked)
                                     zip2.file(entries[0][1]+".docx",  blob);
-                                }
-                                else{
-                                    currentBar++;
-                                    progressBar.style.width = currentBar/barMax*100 + "%"
+                                else
                                     zip2.file("output"+i+".docx",  blob);
-                                }
                             }
                             //saveAs(blob, "output.docx");
                         };
@@ -218,11 +203,7 @@
                                 merge_docx(merging_contents);
                                 merging_contents = [];
                             }
-                            currentBar++;
-                            progressBar.style.width = currentBar/barMax*100 + "%"
                         })
-                        currentBar++;
-                        progressBar.style.width = currentBar/barMax*100 + "%"
                     }
 
                     function generate(values, i=0, final) {
@@ -270,8 +251,6 @@
                         });
                     }
                     function makefiles(objects){
-                        barMax = objects.length*2;
-                        currentBar = 0;
                         for(var i=0; i<objects.length;i++){
                             if(i==objects.length-1)
                                 generate(objects[i],i,true)
@@ -312,10 +291,7 @@
                                     for(let i=1; i<sheet._rows.length; i++){
                                         values = [];
                                         for(let j=0; j<sheet._rows[i]._cells.length; j++){
-                                            if(typeof sheet._rows[i]._cells[j].value === 'object' && sheet._rows[i]._cells[j].value !== null)
-                                                values.push([names[j],sheet._rows[i]._cells[j].value.result])
-                                            else
-                                                values.push([names[j],sheet._rows[i]._cells[j].value])
+                                            values.push([names[j], sheet._rows[i]._cells[j].value])
                                         }
                                     objects.push(Object.fromEntries(values))  
                                   }

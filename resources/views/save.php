@@ -17,9 +17,6 @@
                 <script src="https://cdn.jsdelivr.net/npm/docx-merger@1.2.2/dist/docx-merger.min.js"></script>
                 <script src="./js/jszip.js" ></script>
 
-                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div class="bg-blue-600 h-2.5 rounded-full" id="progressBar" style="width: 0%"></div>
-                </div>
                  <!--<input type="file" id="docx" class="" />-->
                  <h1>Choose .docx file</h1>
                 <form>
@@ -74,16 +71,13 @@
                         class="mt-px cursor-pointer select-none font-light text-gray-700"
                         for="login"
                     >
-                        First Column as filename
+                        First Row as filename
                     </label>
                 </div>
                 <br>
-                 <!--<button onclick="parseExcelFile22()">Generate document</button>-->
-                <button type="button" onclick="parseExcelFile22()" class="py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all text-sm dark:focus:ring-offset-gray-800">
-                Download as .zip file with individual documents
-                </button> 
-                <button type="button" onclick="start()" class="py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all text-sm dark:focus:ring-offset-gray-800">
-                Download all content as single .docx document
+                 <!--<button onclick="parseExcelFile2()">Generate document</button>-->
+                <button type="button" onclick="parseExcelFile2()" class="py-3 px-4 inline-flex justify-center items-center gap-2 rounded-md border border-transparent font-semibold text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all text-sm dark:focus:ring-offset-gray-800">
+                Button
                 </button>
                 <script id="test">
                     </script>
@@ -91,15 +85,10 @@
                 <script>
                     const docx = document.getElementById("docx");
                     const excel = document.getElementById("excel");
-                    const progressBar = document.getElementById('progressBar');
                     var index = 0;
-                    var barMax = 100;
-                    var currentBar = 0;
-                    var zip2 = new JSZip();
-                    var merging_contents = [];
+                    const zip2 = new JSZip();
 
-
-                    function parseExcelFile22(inputElement=excel) {
+                    function parseExcelFile2(inputElement=excel) {
                         var files = inputElement.files || [];
                         if (!files.length) return;
                         var file = files[0];
@@ -124,11 +113,8 @@
                                     for(let j=0; j<sheet._rows[0]._cells.length; j++){
                                         names[j] = sheet._rows[0]._cells[j].value;
                                     }
-                                    barMax = sheet._rows.length;
-                                    currentBar = 0;
                                     for(let i=1; i<sheet._rows.length; i++){
                                         values = [];
-                                        
                                         for(let j=0; j<sheet._rows[i]._cells.length; j++){
                                             if(typeof sheet._rows[i]._cells[j].value === 'object' && sheet._rows[i]._cells[j].value !== null)
                                                 values.push([names[j],sheet._rows[i]._cells[j].value.result])
@@ -138,11 +124,11 @@
                                         }
                                         
                                         values = Object.fromEntries(values);
-                                        //console.log(values);
+                                        console.log(values);
 
-                                        generate22(values, false, i);
+                                        generate(values, false, i);
                                     } 
-                                    generate22(values, true);
+                                    generate(values, true);
                                 });
                             });
 
@@ -150,7 +136,7 @@
                         reader.readAsArrayBuffer(file);
                     }
 
-                    function generate22(values, final, i=0) {
+                    function generate(values, final, i=0) {
                         const reader = new FileReader();
                     
                         if (docx.files.length === 0) {
@@ -183,152 +169,23 @@
                             });
                             // Output the document using Data-URI
                             if(final == true){
-                               
                                 zip2.generateAsync({type:"blob"}).then(function(content) {
                                         saveAs(content, "example.zip");
                                     });
-                                zip2 = new JSZip();
-                                
                             }
                             else{
                                 const entries = Object.entries(values);
-                                //console.log(entries)
-                                if(document.getElementById('checkbox').checked){
-                                    currentBar++;
-                                    progressBar.style.width = currentBar/barMax*100 + "%"
+                                console.log(entries)
+                                if(document.getElementById('checkbox').checked)
                                     zip2.file(entries[0][1]+".docx",  blob);
-                                }
-                                else{
-                                    currentBar++;
-                                    progressBar.style.width = currentBar/barMax*100 + "%"
+                                else
                                     zip2.file("output"+i+".docx",  blob);
-                                }
                             }
                             //saveAs(blob, "output.docx");
                         };
 
                     }
-                    function read(file, final){
-                        const reader = new FileReader();
-                        reader.readAsBinaryString(file);
-                        reader.addEventListener('load', function (evt) {
-                            const content = evt.target.result;
-                            merging_contents.push(content);
-                            if(final){
-                                merge_docx(merging_contents);
-                                merging_contents = [];
-                            }
-                            currentBar++;
-                            progressBar.style.width = currentBar/barMax*100 + "%"
-                        })
-                        currentBar++;
-                        progressBar.style.width = currentBar/barMax*100 + "%"
-                    }
 
-                    function generate(values, i=0, final) {
-                        const reader = new FileReader();
-                    
-                        if (docx.files.length === 0) {
-                            alert("No files selected");
-                        } 
-                        reader.readAsBinaryString(docx.files.item(0));
-
-                        reader.onerror = function (evt) {
-                            console.log("error reading file", evt);
-                            alert("error reading file" + evt);
-                        };
-                        reader.onload = function (evt) {
-                            const content = evt.target.result;
-                            
-                            const zip = new PizZip(content);
-                            const doc = new window.docxtemplater(zip, {
-                                paragraphLoop: true,
-                                linebreaks: true,
-                            });
-
-                            // Render the document (Replace {first_name} by John, {last_name} by Doe, ...)
-                            doc.render(values);
-                            
-                            const blob = doc.getZip().generate({
-                                type: "blob",
-                                mimeType:
-                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                // compression: DEFLATE adds a compression step.
-                                // For a 50MB output document, expect 500ms additional CPU time
-                                compression: "DEFLATE",
-                            });
-
-                            read(new File([blob], "output"+i), final)
-                        };
-
-                    }
-                    function merge_docx (array)  {
-                        var docx = new DocxMerger({},array);
-
-                        docx.save('blob',function (data) {
-                            saveAs(data,"output.docx");
-                        });
-                    }
-                    function makefiles(objects){
-                        barMax = objects.length*2;
-                        currentBar = 0;
-                        for(var i=0; i<objects.length;i++){
-                            if(i==objects.length-1)
-                                generate(objects[i],i,true)
-                            else
-                                generate(objects[i],i,false)
-                        }
-                        //console.log(merging_contents)
-                        
-                    }
-
-                    function parseExcelFile2(inputElement=excel) {
-                        var objects = [];
-                        var files = inputElement.files || [];
-                        if (!files.length) return;
-                        var file = files[0];
-
-                      
-
-                        console.time();
-                      
-                        var reader = new FileReader();
-                        reader.onloadend = function(event) {
-                            var arrayBuffer = reader.result;
-                            var workbook = new ExcelJS.Workbook();
-
-                            // workbook.xlsx.read(buffer)
-                            workbook.xlsx.load(arrayBuffer).then(function(workbook) {
-                                console.timeEnd();
-                              
-                                workbook.worksheets.forEach(function (sheet) {
-                                    var names = [];
-                                    var values = [];
-                                
-
-                                    for(let j=0; j<sheet._rows[0]._cells.length; j++){
-                                        names.push(sheet._rows[0]._cells[j].value)
-                                    }
-                                    for(let i=1; i<sheet._rows.length; i++){
-                                        values = [];
-                                        for(let j=0; j<sheet._rows[i]._cells.length; j++){
-                                            if(typeof sheet._rows[i]._cells[j].value === 'object' && sheet._rows[i]._cells[j].value !== null)
-                                                values.push([names[j],sheet._rows[i]._cells[j].value.result])
-                                            else
-                                                values.push([names[j],sheet._rows[i]._cells[j].value])
-                                        }
-                                    objects.push(Object.fromEntries(values))  
-                                  }
-                                  makefiles(objects)
-                              });
-                          });
-
-                      };
-                      reader.readAsArrayBuffer(file);
-                    }
-                    function start(){
-                        parseExcelFile2(excel);
-                    }
                 </script>
                 </div>
             </div>
